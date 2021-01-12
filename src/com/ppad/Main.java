@@ -11,5 +11,6 @@ public class Main {
 
             threadPoolExecutor.execute(task);
         }
+        threadPoolExecutor.awaitTermination();
     }
 }

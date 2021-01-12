@@ -56,9 +56,6 @@ public class ThreadPoolExecutor {
     }
 
     public void awaitTermination() throws ExecutionThreadPoolException {
-        if (this.execute) {
-            throw new IllegalStateException("Threadpool not terminated before awaiting termination");
-        }
         while (true) {
             boolean flag = true;
             for (Thread thread : threads) {
@@ -68,6 +65,7 @@ public class ThreadPoolExecutor {
                 }
             }
             if (flag) {
+                terminate();
                 return;
             }
             try {
