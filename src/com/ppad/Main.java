@@ -11,6 +11,10 @@ public class Main {
 
             threadPoolExecutor.execute(task);
         }
-        threadPoolExecutor.awaitTermination();
+        try {
+            threadPoolExecutor.awaitTermination();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

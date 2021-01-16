@@ -1,18 +1,21 @@
 package com.ppad;
 
-import java.util.Queue;
-
-public class ExecutionThread extends Thread {
-    private final Boolean execute;
-    private final Queue<Runnable> runnables;
+public class WorkerThread extends Thread {
+    private Boolean execute;
+    private final BlockingQueue<Runnable> runnables;
     private final int keepAliveTime;
 
 
-    public ExecutionThread(String name, Boolean execute, Queue<Runnable> runnables, int keepAliveTime) {
+    public WorkerThread(String name, Boolean execute, BlockingQueue<Runnable> runnables, int keepAliveTime) {
         super(name);
         this.execute = execute;
         this.runnables = runnables;
         this.keepAliveTime = keepAliveTime;
+    }
+
+    public void setExecute(boolean execute){
+        this.execute = execute;
+        System.out.println(execute);
     }
 
     @Override
@@ -22,6 +25,7 @@ public class ExecutionThread extends Thread {
                 Runnable runnable;
 
                 while ((runnable = runnables.poll()) != null) {
+                    System.out.println(runnables.toString());
                     runnable.run();
                 }
 
