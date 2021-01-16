@@ -39,7 +39,11 @@ public class BlockingQueue<T> {
         queue.clear();
     }
 
-    public boolean isEmpty() {
+    public synchronized boolean isEmpty() {
+        if(queue.isEmpty())
+        {
+            notifyAll();
+        }
         return queue.isEmpty();
     }
 }

@@ -7,7 +7,7 @@ public class ThreadPoolExecutor {
     private final int corePoolSize;
     private final int maximumPoolSize;
     private final int keepAliveTime;
-    private volatile Boolean execute;
+    private volatile Boolean isRunning = true;
     private final List<WorkerThread> threads;
 
     public ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, int keepAliveTime, int queueSize) {
@@ -17,14 +17,13 @@ public class ThreadPoolExecutor {
         this.keepAliveTime = keepAliveTime;
         this.runnablesQueue = new BlockingQueue<>(queueSize);
         this.maximumPoolSize = maximumPoolSize;
-        this.execute = true;
         this.threads = new ArrayList<>();
-        createThreads();
+        createCoreThreads();
     }
 
-    private void createThreads() {
-        for (int threadIndex = 0; threadIndex <= this.corePoolSize; threadIndex++) {
-            WorkerThread thread = new WorkerThread("Thread" + threadIndex, this.execute, this.runnablesQueue, this.keepAliveTime);
+    private void createCoreThreads() {
+        for (int threadIndex = 0; threadIndex < this.corePoolSize; threadIndex++) {
+            WorkerThread thread = new WorkerThread("Thread" + threadIndex, this.runnablesQueue, this.keepAliveTime, ThreadType.CORE);
             thread.start();
             this.threads.add(thread);
         }
@@ -32,15 +31,15 @@ public class ThreadPoolExecutor {
 
     public void addWorker() {
         if (threads.size() + 1 > maximumPoolSize) {
-            throw new ExecutionThreadPoolException(new Throwable("The number of threads is higher than the maximumCorePoolSize"));
+            throw new ExecutionThreadPoolException(new Throwable("The number of threads is higher than the maximumPoolSize"));
         }
-        WorkerThread thread = new WorkerThread("Thread" + threads.size() + 1, this.execute, this.runnablesQueue, this.keepAliveTime);
+        WorkerThread thread = new WorkerThread("Thread" + threads.size(), this.runnablesQueue, this.keepAliveTime, ThreadType.TEMPORARY);
         thread.start();
         this.threads.add(thread);
     }
 
     public void execute(Runnable runnable) {
-        if (this.execute) {
+        if (isRunning) {
             try {
                 runnablesQueue.add(runnable);
             } catch (InterruptedException e) {
@@ -52,32 +51,17 @@ public class ThreadPoolExecutor {
     }
 
     public void awaitTermination() throws InterruptedException {
-        while (true) {
-            boolean flag = true;
-            for (Thread thread : threads) {
-                if (thread.isAlive()) {
-                    flag = false;
-                    break;
-                }
-            }
-            if (flag) {
-                terminate();
-                return;
-            }
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                throw e;
-            }
-        }
-    }
-
-    public void terminate() {
-        runnablesQueue.clear();
+        while (runnablesQueue.isEmpty());
         stop();
     }
 
     public void stop() {
-        execute = false;
+        isRunning = false;
+        runnablesQueue.clear();
+        for (WorkerThread thread : threads) {
+            if (thread.isAlive()) {
+                thread.setExecute(false);
+            }
+        }
     }
 }
