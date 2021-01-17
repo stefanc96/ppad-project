@@ -1,7 +1,7 @@
 package com.ppad;
 
 public class WorkerThread extends Thread {
-    private Boolean execute = true;
+    private Boolean isActive = true;
     private final BlockingQueue<Runnable> runnables;
     private final int keepAliveTime;
     private final ThreadType threadType;
@@ -14,9 +14,8 @@ public class WorkerThread extends Thread {
         this.threadType = threadType;
     }
 
-    public void setExecute(boolean execute){
-        this.execute = execute;
-        System.out.println(execute);
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
     }
 
     @Override
@@ -25,7 +24,7 @@ public class WorkerThread extends Thread {
         long endExecution;
 
         try {
-            while (execute || runnables.isEmpty()) {
+            while (isActive || !runnables.isEmpty()) {
                 Runnable runnable;
                 if((runnable = runnables.poll()) != null) {
                     startExecution = System.currentTimeMillis();
@@ -35,11 +34,13 @@ public class WorkerThread extends Thread {
                 endExecution = System.currentTimeMillis();
                 long totalTime = endExecution - startExecution;
 
-                if(threadType == ThreadType.TEMPORARY && totalTime >= keepAliveTime){
-                    System.out.println("Temporary thread stopped!");
+                System.out.println(totalTime);
+                if (threadType == ThreadType.TEMPORARY && totalTime >= keepAliveTime) {
+                    System.out.println("Temporary thread stopped: " + getName());
                     return;
                 }
             }
+            System.out.println("Finished core thread: " + getName());
         } catch (RuntimeException | InterruptedException e) {
             throw new ExecutionThreadPoolException(e);
         }

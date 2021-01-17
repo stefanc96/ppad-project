@@ -23,7 +23,7 @@ public class ThreadPoolExecutor {
 
     private void createCoreThreads() {
         for (int threadIndex = 0; threadIndex < this.corePoolSize; threadIndex++) {
-            WorkerThread thread = new WorkerThread("Thread" + threadIndex, this.runnablesQueue, this.keepAliveTime, ThreadType.CORE);
+            WorkerThread thread = new WorkerThread("Thread " + threadIndex, this.runnablesQueue, this.keepAliveTime, ThreadType.CORE);
             thread.start();
             this.threads.add(thread);
         }
@@ -33,7 +33,7 @@ public class ThreadPoolExecutor {
         if (threads.size() + 1 > maximumPoolSize) {
             throw new ExecutionThreadPoolException(new Throwable("The number of threads is higher than the maximumPoolSize"));
         }
-        WorkerThread thread = new WorkerThread("Thread" + threads.size(), this.runnablesQueue, this.keepAliveTime, ThreadType.TEMPORARY);
+        WorkerThread thread = new WorkerThread("Thread " + threads.size(), this.runnablesQueue, this.keepAliveTime, ThreadType.TEMPORARY);
         thread.start();
         this.threads.add(thread);
     }
@@ -51,17 +51,15 @@ public class ThreadPoolExecutor {
     }
 
     public void awaitTermination() throws InterruptedException {
-        while (runnablesQueue.isEmpty());
+        while (!runnablesQueue.isEmpty()){}
         stop();
     }
 
     public void stop() {
+        this.runnablesQueue.setRunning(false);
         isRunning = false;
-        runnablesQueue.clear();
         for (WorkerThread thread : threads) {
-            if (thread.isAlive()) {
-                thread.setExecute(false);
-            }
+            thread.setIsActive(false);
         }
     }
 }

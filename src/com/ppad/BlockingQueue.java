@@ -6,7 +6,8 @@ import java.util.List;
 public class BlockingQueue<T> {
 
     private final List<T> queue = new LinkedList<>();
-    private int size = 10;
+    private final int size;
+    private volatile boolean isRunning = true;
 
     public BlockingQueue(int queueSize) {
         this.size = queueSize;
@@ -25,23 +26,25 @@ public class BlockingQueue<T> {
 
     public synchronized T poll()
             throws InterruptedException {
-        while (queue.size() == 0) {
+        while (queue.size() == 0 && isRunning) {
             wait();
         }
-        if (queue.size() == size) {
+        if (queue.size() > 0) {
             notifyAll();
+        }
+        if(!isRunning) {
+            return null;
         }
 
         return queue.remove(0);
     }
 
-    public void clear() {
-        queue.clear();
+    public void setRunning(boolean running) {
+        isRunning = running;
     }
 
     public synchronized boolean isEmpty() {
-        if(queue.isEmpty())
-        {
+        if(queue.isEmpty()){
             notifyAll();
         }
         return queue.isEmpty();
