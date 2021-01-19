@@ -34,7 +34,6 @@ public class WorkerThread extends Thread {
                 endExecution = System.currentTimeMillis();
                 long totalTime = endExecution - startExecution;
 
-                System.out.println(totalTime);
                 if (threadType == ThreadType.TEMPORARY && totalTime >= keepAliveTime) {
                     System.out.println("Temporary thread stopped: " + getName());
                     return;

@@ -19,7 +19,7 @@ public class BlockingQueue<T> {
             wait();
         }
         queue.add(item);
-        if (queue.size() == 1) {
+        if (queue.size() != 0) {
             notifyAll();
         }
     }

@@ -2,7 +2,7 @@ package com.ppad;
 
 public class Main {
     public static void main(String[] args) {
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(2, 15, 5, 10);
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(6, 15, 5, 10);
 
         threadPoolExecutor.addWorker();
         threadPoolExecutor.addWorker();
